@@ -1,0 +1,21 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.idea/
+*.code-workspace
+
+# Direnv / local env
+.envrc.local
+
+# Env files — safety net so secrets never get committed by accident
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log

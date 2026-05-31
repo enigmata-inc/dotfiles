@@ -1,0 +1,39 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Clean, fast prompt that avoids exotic glyphs so it renders in any terminal.
+format = "$directory$git_branch$git_status$nodejs$rust$python$cmd_duration$line_break$character"
+add_newline = false
+command_timeout = 1000
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+symbol = ""
+format = "[$branch]($style) "
+style = "bold purple"
+
+[git_status]
+style = "bold yellow"
+
+[cmd_duration]
+min_time = 2000
+format = "[took $duration]($style) "
+style = "dimmed white"
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+# Language modules show only inside relevant projects; keep them quiet elsewhere.
+[nodejs]
+symbol = "node "
+format = "[$symbol($version )]($style)"
+[rust]
+symbol = "rust "
+format = "[$symbol($version )]($style)"
+[python]
+symbol = "py "
+format = "[$symbol($version )]($style)"

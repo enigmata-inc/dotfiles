@@ -1,0 +1,87 @@
+# ─────────────────────────────────────────────────────────────────────────
+# Team baseline zsh config
+#
+# The CLI *tools* (mise, starship, zoxide, eza, bat, fzf, antidote, …) are
+# provided by the Docker image. This file only *configures* them, and every
+# integration is guarded with `command -v`, so it also works on a plain box
+# where a tool happens to be missing — it just degrades to a working shell.
+#
+# Personal tweaks go in ~/.config/zsh/local.zsh (created for you, never tracked).
+# ─────────────────────────────────────────────────────────────────────────
+
+# ── History ──────────────────────────────────────────────────────────────
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt share_history hist_ignore_all_dups hist_ignore_space hist_verify inc_append_history
+
+# ── Shell options ────────────────────────────────────────────────────────
+setopt auto_cd auto_pushd pushd_ignore_dups interactive_comments extended_glob no_beep
+
+# ── Environment ──────────────────────────────────────────────────────────
+export EDITOR="$(command -v nvim || command -v vim || command -v vi)"
+export VISUAL="$EDITOR"
+export PAGER="less"
+export LESS="-FRX"
+# Render man pages with bat (syntax-highlighted) when available.
+command -v bat >/dev/null && export MANPAGER="sh -c 'col -bx | bat -l man -p'" MANROFFOPT="-c"
+# Point ripgrep at its config file (see ~/.config/ripgrep/config).
+export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
+
+# ── Completion ───────────────────────────────────────────────────────────
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'        # case-insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# ── Plugins via antidote ─────────────────────────────────────────────────
+# Prefer the image's prebuilt static bundle (instant, offline, world-readable);
+# fall back to loading into a user-writable cache on machines without it.
+if [[ -f /usr/share/antidote/team-bundle.zsh ]]; then
+  source /usr/share/antidote/team-bundle.zsh
+elif [[ -f /usr/share/antidote/antidote.zsh ]]; then
+  export ANTIDOTE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/antidote"
+  source /usr/share/antidote/antidote.zsh
+  antidote load "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/.zsh_plugins.txt"
+fi
+
+# ── Tool integrations (all guarded) ──────────────────────────────────────
+command -v mise     >/dev/null && eval "$(mise activate zsh)"
+command -v starship >/dev/null && eval "$(starship init zsh)"
+command -v zoxide   >/dev/null && eval "$(zoxide init zsh)"
+
+# fzf — fuzzy finder. Use fd for listings; sensible default UI.
+if command -v fd >/dev/null; then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+fi
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --info=inline'
+if command -v fzf >/dev/null; then
+  if fzf --zsh >/dev/null 2>&1; then            # fzf >= 0.48
+    source <(fzf --zsh)
+  else                                          # older fzf ships example scripts
+    [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+    [ -f /usr/share/doc/fzf/examples/completion.zsh   ] && source /usr/share/doc/fzf/examples/completion.zsh
+  fi
+fi
+
+# ── Aliases ──────────────────────────────────────────────────────────────
+# Modern ls via eza, falling back to coreutils ls.
+if command -v eza >/dev/null; then
+  alias ls='eza --group-directories-first --icons=auto'
+  alias ll='eza -l  --group-directories-first --icons=auto --git'
+  alias la='eza -la --group-directories-first --icons=auto --git'
+  alias lt='eza --tree --level=2 --icons=auto'
+else
+  alias ll='ls -alF'; alias la='ls -A'; alias l='ls -CF'
+fi
+command -v lazygit >/dev/null && alias lg='lazygit'
+[ -f "$XDG_CONFIG_HOME/zsh/aliases.zsh" ] && source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
+
+# ── Coder: route git-over-SSH through the agent (guarded for non-Coder) ──
+[ -x /usr/local/bin/coder ] && export GIT_SSH_COMMAND="/usr/local/bin/coder gitssh --"
+
+# ── Personal overlay (untracked; created as a stub by install.sh) ────────
+[ -f "$XDG_CONFIG_HOME/zsh/local.zsh" ] && source "$XDG_CONFIG_HOME/zsh/local.zsh"

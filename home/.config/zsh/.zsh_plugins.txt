@@ -1,0 +1,17 @@
+# Antidote plugin bundle. Add your own in ~/.config/zsh/local.zsh-land or here
+# via a personal fork; this file is the team baseline. Order matters.
+
+# Extra completion definitions (load before compdef-driven plugins).
+zsh-users/zsh-completions
+
+# Replace tab-completion with fzf-powered fuzzy matching.
+Aloxaf/fzf-tab
+
+# Fish-style autosuggestions from history.
+zsh-users/zsh-autosuggestions
+
+# Gently reminds you of the team aliases when you type the long form.
+MichaelAquilina/zsh-you-should-use
+
+# Syntax highlighting — MUST be the last plugin loaded.
+zsh-users/zsh-syntax-highlighting

@@ -1,0 +1,4 @@
+# bat configuration (https://github.com/sharkdp/bat)
+--theme="ansi"
+--style="numbers,changes,header"
+--paging=auto

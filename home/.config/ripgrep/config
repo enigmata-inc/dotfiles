@@ -1,0 +1,7 @@
+# ripgrep configuration (loaded via $RIPGREP_CONFIG_PATH).
+--smart-case
+--hidden
+--follow
+--glob=!.git/
+--max-columns=200
+--max-columns-preview

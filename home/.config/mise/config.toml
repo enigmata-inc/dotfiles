@@ -1,0 +1,19 @@
+# Global mise configuration.
+#
+# Language runtimes (Node, Rust, Python, …) are pinned PER PROJECT in each
+# repo's `mise.toml` or `.tool-versions`, and mise installs them automatically
+# when you cd into the project. That keeps this baseline light and lets every
+# repo declare exactly what it needs.
+#
+# The CLI tools (starship, zoxide, eza, fd, bat, …) are provided by the Docker
+# image, so they are intentionally NOT managed here.
+#
+# To pin a runtime globally anyway, uncomment and edit:
+# [tools]
+# node = "lts"
+# python = "3.12"
+
+# Note: mise prompts before using a repo's mise.toml the first time. Run
+# `mise trust` inside a repo you trust to silence it. We deliberately do NOT
+# auto-trust all of $HOME, so a freshly cloned repo can't run its mise env/tasks
+# without your say-so.

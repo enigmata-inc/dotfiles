@@ -1,0 +1,52 @@
+# Team baseline git config.
+#
+# No identity is set here. On Coder, your name/email come from your workspace
+# profile automatically. Anywhere else, set them in ~/.config/git/local.config.
+# Delta (the diff pager) is enabled by install.sh only if it is installed,
+# so this config stays portable to machines without delta.
+
+[include]
+	path = ~/.config/git/local.config   ; per-user identity / overrides (untracked)
+	path = ~/.config/git/delta.config   ; pager wiring, written by install.sh if delta exists
+
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+	default = simple
+	followTags = true
+[fetch]
+	prune = true
+	pruneTags = true
+[rebase]
+	autosquash = true
+	autostash = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[core]
+	excludesfile = ~/.gitignore_global
+[color]
+	ui = auto
+[diff]
+	colorMoved = default
+	algorithm = histogram
+[merge]
+	conflictstyle = zdiff3
+[rerere]
+	enabled = true
+[delta]
+	navigate = true
+	line-numbers = true
+	hyperlinks = true
+[alias]
+	st = status -sb
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	lg = log --oneline --graph --decorate --all
