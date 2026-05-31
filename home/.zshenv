@@ -11,3 +11,8 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Rust/Cargo env, if present on this machine.
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+# Git identity: load the GitHub-derived identity (sync-identity.sh) so it
+# OVERRIDES the Coder-injected profile email. Just sources a cached file — fast.
+[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/git/identity.env" ] && \
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/git/identity.env"

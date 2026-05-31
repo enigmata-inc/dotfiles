@@ -31,7 +31,8 @@ man pages), [`fd`](https://github.com/sharkdp/fd) + [`fzf`](https://github.com/j
 [`lazygit`](https://github.com/jesseduffield/lazygit) (`lg`).
 
 **Git**: modern defaults (rebase pulls, auto-setup-remote, histogram diffs,
-`zdiff3` conflicts, rerere) and delta-powered diffs. **No identity is shipped.**
+`zdiff3` conflicts, rerere) and delta-powered diffs. **Identity is derived from
+your GitHub account** (see [Git identity](#git-identity)), not hard-coded.
 
 ## Runtimes: pin them per project
 
@@ -48,9 +49,28 @@ rust = "stable"
 
 ## Git identity
 
-On Coder, identity comes from your workspace
-profile automatically. Anywhere else, set it once in `~/.config/git/local.config`
-(a stub is created for you).
+On Coder, the agent injects `GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_EMAIL` from your
+Coder **profile** email (e.g. `you@probabilitydrive.com`). That address is often
+*not* a verified email on your GitHub account, so GitHub and Vercel reject your
+commits (*"commit author email is not valid"*) and block builds.
+
+`home/.config/git/sync-identity.sh` fixes this: on workspace start it derives
+your identity from your **GitHub** account (via `gh`) and writes it to
+`~/.config/git/identity.env` (sourced by `.zshenv` to override the injected env
+vars — env beats `git config`, so this is what actually wins in a shell) and
+`~/.config/git/identity.config` (a git-config `[include]`). It prefers your
+primary *verified* GitHub email and falls back to your privacy-safe
+`{id}+{login}@users.noreply.github.com` address.
+
+Override it any time in `~/.config/git/local.config` (included last, so it
+wins) — also where you set identity on non-Coder machines. A stub is created
+for you.
+
+> **Note:** the shell override covers terminal/CLI git (including `lazygit`).
+> Editors that run git with the raw agent environment (e.g. the VS Code Git
+> panel) still inherit the Coder env vars. The complete fleet-wide fix is to
+> stop injecting `GIT_*_EMAIL` in the Coder **template** (or inject the
+> GitHub-derived value there); this repo handles every shell-driven workflow.
 
 ## Make it yours
 

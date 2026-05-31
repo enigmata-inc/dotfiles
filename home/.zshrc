@@ -83,5 +83,15 @@ command -v lazygit >/dev/null && alias lg='lazygit'
 # ── Coder: route git-over-SSH through the agent (guarded for non-Coder) ──
 [ -x /usr/local/bin/coder ] && export GIT_SSH_COMMAND="/usr/local/bin/coder gitssh --"
 
+# ── Git identity: derive from GitHub on first use if not cached yet ──────────
+# install.sh syncs this at workspace start, but gh may not have been
+# authenticated yet. Catch that here (interactive, network is up) then load it.
+if [ ! -r "${XDG_CONFIG_HOME:-$HOME/.config}/git/identity.env" ] \
+   && [ -x "${XDG_CONFIG_HOME:-$HOME/.config}/git/sync-identity.sh" ]; then
+  "${XDG_CONFIG_HOME:-$HOME/.config}/git/sync-identity.sh" >/dev/null 2>&1
+  [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/git/identity.env" ] && \
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/git/identity.env"
+fi
+
 # ── Personal overlay (untracked; created as a stub by install.sh) ────────
 [ -f "$XDG_CONFIG_HOME/zsh/local.zsh" ] && source "$XDG_CONFIG_HOME/zsh/local.zsh"

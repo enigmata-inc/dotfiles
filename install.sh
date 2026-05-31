@@ -59,8 +59,8 @@ main() {
 
   stub "$HOME/.config/git/local.config" \
     "# Personal git config — not tracked by the team dotfiles repo." \
-    "# On Coder your identity comes from your workspace profile automatically." \
-    "# On other machines, set it here:" \
+    "# On Coder, your identity is auto-derived from your GitHub account by" \
+    "# sync-identity.sh. Override it here (included last, so this wins):" \
     "# [user]" \
     "#     name = Your Name" \
     "#     email = you@example.com"
@@ -78,6 +78,14 @@ main() {
     log "enabled git-delta pager"
   else
     : > "$delta_cfg"                              # empty include — harmless
+  fi
+
+  # Map git identity to your GitHub account so commits are attributable on
+  # GitHub/Vercel (the Coder profile email often isn't a verified GitHub
+  # address). Best-effort: no-ops if gh isn't ready, and .zshrc retries on the
+  # first interactive shell. Never blocks boot.
+  if [ -x "$HOME/.config/git/sync-identity.sh" ]; then
+    "$HOME/.config/git/sync-identity.sh" || true
   fi
 
   log "Done."

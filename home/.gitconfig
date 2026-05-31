@@ -1,13 +1,15 @@
 # Team baseline git config.
 #
-# No identity is set here. On Coder, your name/email come from your workspace
-# profile automatically. Anywhere else, set them in ~/.config/git/local.config.
+# No identity is hard-coded here. On Coder, sync-identity.sh derives it from
+# your GitHub account (via gh) into identity.config; override it in
+# ~/.config/git/local.config. Anywhere else, set it in local.config.
 # Delta (the diff pager) is enabled by install.sh only if it is installed,
 # so this config stays portable to machines without delta.
 
 [include]
-	path = ~/.config/git/local.config   ; per-user identity / overrides (untracked)
-	path = ~/.config/git/delta.config   ; pager wiring, written by install.sh if delta exists
+	path = ~/.config/git/identity.config   ; GitHub identity, written by sync-identity.sh
+	path = ~/.config/git/local.config      ; per-user identity / overrides (untracked, wins)
+	path = ~/.config/git/delta.config      ; pager wiring, written by install.sh if delta exists
 
 [init]
 	defaultBranch = main
