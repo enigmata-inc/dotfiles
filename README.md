@@ -1,6 +1,6 @@
 # dotfiles
 
-A modern, **secret-free** dotfiles baseline for [Coder](https://coder.com)
+A modern dotfiles baseline for [Coder](https://coder.com)
 workspaces (and any Linux box). Applied automatically on workspace start, or
 installed by hand, so you get a complete modern shell with nothing to configure.
 
@@ -17,12 +17,12 @@ no downloads on boot, so a flaky network can't break the shell.
 
 ## What you get
 
-**Shell** — zsh with [antidote](https://github.com/mattmc3/antidote) plugins
+**Shell**: zsh with [antidote](https://github.com/mattmc3/antidote) plugins
 (autosuggestions, fzf-tab completion, syntax highlighting, and a *you-should-use*
 helper), a fast [starship](https://starship.rs) prompt, and sensible
 history/completion.
 
-**Modern CLI** — [`mise`](https://mise.jdx.dev) (runtimes + env),
+**Modern CLI**: [`mise`](https://mise.jdx.dev) (runtimes + env),
 [`eza`](https://eza.rocks) (ls), [`bat`](https://github.com/sharkdp/bat) (cat &
 man pages), [`fd`](https://github.com/sharkdp/fd) + [`fzf`](https://github.com/junegunn/fzf)
 (find), [`ripgrep`](https://github.com/BurntSushi/ripgrep) (grep),
@@ -30,7 +30,7 @@ man pages), [`fd`](https://github.com/sharkdp/fd) + [`fzf`](https://github.com/j
 [`git-delta`](https://github.com/dandavison/delta) (diffs), and
 [`lazygit`](https://github.com/jesseduffield/lazygit) (`lg`).
 
-**Git** — modern defaults (rebase pulls, auto-setup-remote, histogram diffs,
+**Git**: modern defaults (rebase pulls, auto-setup-remote, histogram diffs,
 `zdiff3` conflicts, rerere) and delta-powered diffs. **No identity is shipped.**
 
 ## Runtimes: pin them per project
@@ -48,20 +48,19 @@ rust = "stable"
 
 ## Git identity
 
-This repo ships **no** name/email. On Coder, identity comes from your workspace
+On Coder, identity comes from your workspace
 profile automatically. Anywhere else, set it once in `~/.config/git/local.config`
 (a stub is created for you).
 
 ## Make it yours
 
-Everything personal goes in `~/.config/zsh/local.zsh` — aliases, exports, or
+Everything personal goes in `~/.config/zsh/local.zsh`: aliases, exports, or
 opt-in tools like [atuin](https://atuin.sh) (`eval "$(atuin init zsh)"`). You get
 the baseline *and* your own setup without forking this repo.
 
 ## Install by hand
 
 ```bash
-git clone https://github.com/<org>/dotfiles ~/.dotfiles
 ~/.dotfiles/install.sh
 ```
 
