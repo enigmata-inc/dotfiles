@@ -59,11 +59,18 @@ main() {
 
   stub "$HOME/.config/git/local.config" \
     "# Personal git config — not tracked by the team dotfiles repo." \
-    "# On Coder your identity comes from your workspace profile automatically." \
-    "# On other machines, set it here:" \
+    "# On Coder your identity is auto-seeded from your GitHub login into" \
+    "# identity.config; set [user] here only to override it or on other machines:" \
     "# [user]" \
     "#     name = Your Name" \
     "#     email = you@example.com"
+
+  # Ensure the auto-seeded identity include always exists so git never errors on
+  # a missing include. The Coder template fills this from your GitHub login on
+  # workspace start; off Coder it stays an empty (harmless) include.
+  local identity_cfg="$HOME/.config/git/identity.config"
+  mkdir -p "$(dirname "$identity_cfg")"
+  [ -e "$identity_cfg" ] || : > "$identity_cfg"
 
   # Enable git-delta as the diff pager ONLY when delta is installed, so the
   # tracked .gitconfig stays portable to machines without it.
