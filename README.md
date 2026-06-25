@@ -10,7 +10,7 @@ installed by hand, so you get a complete modern shell with nothing to configure.
 |-------|----------|----------------|
 | **Container image** | the *tools* (binaries) | the dev image |
 | **This repo** | the *configuration* | applied at workspace start via the Coder dotfiles module |
-| **Your overlay** | *your* personal tweaks | `~/.config/zsh/local.zsh` (created for you, never tracked) |
+| **Your overlay** | *your* personal tweaks | auto-synced `overlay.zsh` (from your own `coder-overlay` repo) and `~/.config/zsh/local.zsh` (per-box, never tracked) |
 
 Because the tools are baked into the image, `install.sh` only creates symlinks —
 no downloads on boot, so a flaky network can't break the shell.
@@ -54,9 +54,22 @@ profile automatically. Anywhere else, set it once in `~/.config/git/local.config
 
 ## Make it yours
 
-Everything personal goes in `~/.config/zsh/local.zsh`: aliases, exports, or
-opt-in tools like [atuin](https://atuin.sh) (`eval "$(atuin init zsh)"`). You get
-the baseline *and* your own setup without forking this repo.
+There are two personal slots, both loaded after the baseline and never tracked here:
+
+**`~/.config/zsh/overlay.zsh`** is auto-synced to every workspace from *your own*
+private repo. Create a private repo named `coder-overlay` on your GitHub account
+with an `overlay.zsh` at its root; on workspace start the Coder template reads it
+(using the GitHub auth you already have, no extra scope and no parameter) and
+writes it here. This is how your aliases, exports, and opt-in tools like
+[atuin](https://atuin.sh) (`eval "$(atuin init zsh)"`) follow you to a fresh box.
+Keep it secret-free; real secrets belong in your secret manager. No `coder-overlay`
+repo means a clean baseline, nothing breaks.
+
+**`~/.config/zsh/local.zsh`** is a per-box file (a stub is created for you) for
+one-off tweaks on a single machine. It loads last, so it overrides the synced
+overlay.
+
+Either way you get the baseline plus your own setup without forking this repo.
 
 ## Install by hand
 
