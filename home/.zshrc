@@ -83,5 +83,8 @@ command -v lazygit >/dev/null && alias lg='lazygit'
 # ── Coder: route git-over-SSH through the agent (guarded for non-Coder) ──
 [ -x /usr/local/bin/coder ] && export GIT_SSH_COMMAND="/usr/local/bin/coder gitssh --"
 
-# ── Personal overlay (untracked; created as a stub by install.sh) ────────
+# ── Auto-seeded overlay (synced from your private coder-overlay repo by the Coder template; do not edit) ──
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/overlay.zsh" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/overlay.zsh"
+
+# ── Personal overlay (untracked; per-box hand edits; loaded last so they win) ────────
 [ -f "$XDG_CONFIG_HOME/zsh/local.zsh" ] && source "$XDG_CONFIG_HOME/zsh/local.zsh"
