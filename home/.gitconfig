@@ -53,4 +53,4 @@
 	ci = commit
 	unstage = reset HEAD --
 	last = log -1 HEAD
-	lg = log --oneline --graph --decorate --all
+	graph = log --oneline --graph --decorate --all
