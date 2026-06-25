@@ -9,8 +9,11 @@
 #
 # Design notes:
 #   * `set -e` is intentionally NOT used: a single failure must never abort
-#     boot for everyone. Each step is self-contained and best-effort.
-#   * Real files are backed up once to <file>.bak before being symlinked.
+#     boot for everyone. Each step is self-contained and best-effort, but every
+#     failure is reported to stderr and the script exits non-zero if any fail.
+#   * Anything in the way (a real file, or a foreign symlink that points outside
+#     this repo) is moved aside to <file>.bak before being symlinked; an
+#     existing <file>.bak is never clobbered (a timestamped name is used).
 #   * Personal overlay stubs are created but never overwritten.
 # ─────────────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -18,23 +21,51 @@ set -uo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOME_SRC="$DOTFILES_DIR/home"
 
-log() { printf '  %s\n' "$*"; }
+FAILURES=0
+
+log()  { printf '  %s\n' "$*"; }
+warn() { printf '  %s\n' "$*" >&2; FAILURES=$((FAILURES + 1)); }
+
+# Move an existing path aside to <path>.bak without ever clobbering a prior
+# backup: if <path>.bak already exists, a timestamped name is used instead.
+# Warns and returns non-zero on failure so callers can skip rather than
+# destroy whatever is in the way.
+backup() {
+  local path="$1" bak="$1.bak"
+  if [ -e "$bak" ] || [ -L "$bak" ]; then
+    bak="$path.bak.$(date +%s)"
+  fi
+  if mv "$path" "$bak"; then
+    log "backed up $path -> $bak"
+  else
+    warn "FAILED to back up $path; leaving it in place"
+    return 1
+  fi
+}
 
 # Symlink every file under home/ into $HOME, preserving directory structure.
 link_tree() {
-  local src dest
+  local src dest target
   while IFS= read -r -d '' src; do
     dest="$HOME/${src#"$HOME_SRC"/}"
-    mkdir -p "$(dirname "$dest")"
-    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
-      continue                                   # already correct
+    mkdir -p "$(dirname "$dest")" || { warn "FAILED to create $(dirname "$dest")"; continue; }
+    if [ -L "$dest" ]; then
+      target="$(readlink "$dest")"
+      [ "$target" = "$src" ] && continue          # already correct
+      # A symlink we manage (points back into this repo) is safe to repoint;
+      # a foreign symlink (points elsewhere) is backed up, not clobbered.
+      case "$target" in
+        "$HOME_SRC"/*) ;;
+        *) backup "$dest" || continue ;;
+      esac
+    elif [ -e "$dest" ]; then
+      backup "$dest" || continue                  # real file/dir in the way
     fi
-    if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-      mv "$dest" "$dest.bak"
-      log "backed up $dest -> $dest.bak"
+    if ln -sfn "$src" "$dest"; then
+      log "linked $dest"
+    else
+      warn "FAILED to link $dest"
     fi
-    ln -sfn "$src" "$dest"
-    log "linked $dest"
   done < <(find "$HOME_SRC" -type f -print0)
 }
 
@@ -42,9 +73,12 @@ link_tree() {
 stub() {
   local path="$1"; shift
   [ -e "$path" ] && return 0
-  mkdir -p "$(dirname "$path")"
-  printf '%s\n' "$@" > "$path"
-  log "created $path"
+  mkdir -p "$(dirname "$path")" || { warn "FAILED to create $(dirname "$path")"; return 1; }
+  if printf '%s\n' "$@" > "$path"; then
+    log "created $path"
+  else
+    warn "FAILED to create $path"
+  fi
 }
 
 main() {
@@ -65,28 +99,35 @@ main() {
     "#     name = Your Name" \
     "#     email = you@example.com"
 
-  # Ensure the auto-seeded identity include always exists so git never errors on
-  # a missing include. The Coder template fills this from your GitHub login on
-  # workspace start; off Coder it stays an empty (harmless) include.
+  # Provide a stable file for the Coder template to write your auto-seeded
+  # identity into; it fills this from your GitHub login on workspace start.
+  # git silently ignores a missing include, so off Coder it just stays empty.
   local identity_cfg="$HOME/.config/git/identity.config"
-  mkdir -p "$(dirname "$identity_cfg")"
-  [ -e "$identity_cfg" ] || : > "$identity_cfg"
+  mkdir -p "$(dirname "$identity_cfg")" || warn "FAILED to create $(dirname "$identity_cfg")"
+  [ -e "$identity_cfg" ] || : > "$identity_cfg" || warn "FAILED to create $identity_cfg"
 
   # Enable git-delta as the diff pager ONLY when delta is installed, so the
   # tracked .gitconfig stays portable to machines without it.
   local delta_cfg="$HOME/.config/git/delta.config"
-  mkdir -p "$(dirname "$delta_cfg")"
+  mkdir -p "$(dirname "$delta_cfg")" || warn "FAILED to create $(dirname "$delta_cfg")"
   if command -v delta >/dev/null 2>&1; then
-    printf '%s\n' \
+    if printf '%s\n' \
       "[core]" \
       "	pager = delta" \
       "[interactive]" \
-      "	diffFilter = delta --color-only" > "$delta_cfg"
-    log "enabled git-delta pager"
+      "	diffFilter = delta --color-only" > "$delta_cfg"; then
+      log "enabled git-delta pager"
+    else
+      warn "FAILED to write $delta_cfg"
+    fi
   else
-    : > "$delta_cfg"                              # empty include — harmless
+    : > "$delta_cfg" || warn "FAILED to create $delta_cfg"   # empty include — harmless
   fi
 
+  if [ "$FAILURES" -gt 0 ]; then
+    printf '  %s\n' "Done with $FAILURES failure(s); see messages above." >&2
+    exit 1
+  fi
   log "Done."
 }
 

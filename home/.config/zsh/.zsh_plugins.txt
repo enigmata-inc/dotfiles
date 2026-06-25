@@ -1,4 +1,4 @@
-# Antidote plugin bundle. Add your own in ~/.config/zsh/local.zsh-land or here
+# Antidote plugin bundle. Add your own in ~/.config/zsh/local.zsh or here
 # via a personal fork; this file is the team baseline. Order matters.
 
 # Extra completion definitions (load before compdef-driven plugins).
