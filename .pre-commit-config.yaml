@@ -1,0 +1,11 @@
+# Secret-leak guard for this PUBLIC repo. Activated per-clone by install.sh
+# (`pre-commit install`), or manually with the same command. Bump the pin with
+# `pre-commit autoupdate`.
+#
+# gitleaks scans staged content, so it catches secrets the .gitignore denylist
+# can't match by filename (private keys, tokens pasted into a tracked file).
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks

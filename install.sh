@@ -87,6 +87,14 @@ main() {
     : > "$delta_cfg"                              # empty include — harmless
   fi
 
+  # Activate the secret-leak pre-commit guard (gitleaks) so a stray secret can
+  # never be committed to this public repo. Best-effort: needs `pre-commit`, and
+  # only does anything inside the git checkout (a no-op for a bare home symlink).
+  if command -v pre-commit >/dev/null 2>&1 && [ -d "$DOTFILES_DIR/.git" ]; then
+    ( cd "$DOTFILES_DIR" && pre-commit install >/dev/null 2>&1 ) \
+      && log "activated gitleaks pre-commit guard" || true
+  fi
+
   log "Done."
 }
 
