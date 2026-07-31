@@ -34,7 +34,7 @@ Older versions do not receive security fixes; consumers should track the latest 
 ## Scope
 
 In scope: the code and deployment configuration in this repository. Out of scope: findings that
-require a compromised operator workstation or stolen privileged credentials (AWS, GitHub, WorkOS),
+require a compromised operator workstation or stolen privileged credentials (AWS, GitHub, identity provider),
 social engineering, volumetric denial-of-service, and reports generated solely by automated scanners
 without a demonstrated, reproducible impact.
 
