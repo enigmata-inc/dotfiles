@@ -89,8 +89,17 @@ fi
 command -v lazygit >/dev/null && alias lg='lazygit'
 [ -f "$XDG_CONFIG_HOME/zsh/aliases.zsh" ] && source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
-# ── Coder: route git-over-SSH through the agent (guarded for non-Coder) ──
-[ -x /usr/local/bin/coder ] && export GIT_SSH_COMMAND="/usr/local/bin/coder gitssh --"
+# ── Coder: git-over-SSH through the agent (fallback for non-agent shells) ──
+# Agent-spawned sessions (coder ssh, IDE terminals) arrive with GIT_SSH_COMMAND
+# already injected and the agent binary on PATH — never clobber those. This
+# covers shells outside the agent's env chain (zellij panes under systemd,
+# docker exec): the workspace template maintains ~/.local/bin/coder as a stable
+# wrapper for the running agent, and that wrapper's presence doubles as the
+# "inside a Coder workspace" signal, so this never fires on machines that
+# merely have a coder CLI installed.
+if [ -z "${GIT_SSH_COMMAND:-}" ] && [ -x "$HOME/.local/bin/coder" ]; then
+  export GIT_SSH_COMMAND="$HOME/.local/bin/coder gitssh --"
+fi
 
 # ── Auto-seeded overlay (synced from your private coder-overlay repo by the Coder template; do not edit) ──
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/overlay.zsh" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/overlay.zsh"
