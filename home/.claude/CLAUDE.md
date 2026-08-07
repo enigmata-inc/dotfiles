@@ -61,6 +61,17 @@ mechanism alongside the first.
 Validate and narrow payloads at the boundary. Never cast to launder data past
 the type system.
 
+## Challenge everything
+
+Black-and-white rules are a thinking failure before they are a wording one. A
+prohibition is a decision made under assumptions; hiding the assumptions makes
+it unchallengeable, and genuine invariants are VERY rare, so a doc accumulating
+"never"s is accumulating unexamined assumptions. Write every rule as a
+challengeable decision: "we chose X because of Y; if 1, 2 and 3 change, Z opens
+up." Challenge the status quo at every phase of a project, not only at design
+time, and treat a challenge to your own rule as the system working, not as an
+attack.
+
 ## Scope
 
 Default to the scope requested: minimal, surgical changes, with no unrelated
