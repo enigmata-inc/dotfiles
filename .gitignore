@@ -5,3 +5,4 @@
 home/.config/git/delta.config
 home/.config/git/local.config
 home/.config/zsh/local.zsh
+.DS_Store
