@@ -33,6 +33,12 @@ man pages), [`fd`](https://github.com/sharkdp/fd) + [`fzf`](https://github.com/j
 **Git**: modern defaults (rebase pulls, auto-setup-remote, histogram diffs,
 `zdiff3` conflicts, rerere) and delta-powered diffs. **No identity is shipped.**
 
+**Claude Code**: the fleet `~/.claude/CLAUDE.md` plus baseline settings from
+`claude/settings.json`, deep-merged into `~/.claude/settings.json` on every start.
+Only the baseline keys are asserted; everything else in that file (theme, hooks,
+your own keys) is left untouched, and the file is never symlinked because Claude
+Code rewrites it at runtime.
+
 ## Runtimes: pin them per project
 
 Don't install language runtimes globally. In each repo, add a `mise.toml`:

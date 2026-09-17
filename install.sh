@@ -81,9 +81,45 @@ stub() {
   fi
 }
 
+# Assert the fleet-baseline Claude Code settings (claude/settings.json) in
+# ~/.claude/settings.json. That file is deliberately NOT symlinked: Claude Code
+# rewrites it at runtime (theme, auto-update state, per-box keys), so a symlink
+# would either be clobbered or push one box's runtime state onto the whole
+# fleet. Instead the baseline keys are deep-merged in with jq, touching nothing
+# else and writing only when a key is missing or differs. A corrupt settings
+# file is reported and left alone rather than overwritten.
+merge_claude_settings() {
+  local baseline="$DOTFILES_DIR/claude/settings.json"
+  local settings="$HOME/.claude/settings.json" current merged tmp drift
+  [ -f "$baseline" ] || { warn "missing $baseline"; return; }
+  command -v jq >/dev/null 2>&1 || { warn "jq not found; cannot apply Claude baseline settings"; return; }
+  jq -e . "$baseline" >/dev/null 2>&1 || { warn "$baseline is not valid JSON"; return; }
+  mkdir -p "$(dirname "$settings")" || { warn "FAILED to create $(dirname "$settings")"; return; }
+  if [ -e "$settings" ]; then
+    current="$(jq -c . "$settings" 2>/dev/null)" || { warn "$settings is not valid JSON; leaving it alone (fix it, then re-run)"; return; }
+  else
+    current="{}"
+  fi
+  merged="$(jq -c --slurpfile b "$baseline" ". * \$b[0]" <<<"$current")" || { warn "FAILED to merge Claude baseline settings"; return; }
+  if [ "$merged" != "$current" ]; then
+    tmp="$(mktemp "$(dirname "$settings")/.settings.json.XXXXXX")" || { warn "mktemp failed for $settings"; return; }
+    if jq . <<<"$merged" > "$tmp" && mv "$tmp" "$settings"; then
+      log "applied Claude baseline settings to $settings"
+    else
+      rm -f "$tmp"; warn "FAILED to write $settings"; return
+    fi
+  fi
+  # Verify: every baseline leaf must read back with the baseline value.
+  drift="$(jq -r --slurpfile b "$baseline" \
+    "[(\$b[0] | paths(scalars)) as \$p | select(getpath(\$p) != (\$b[0] | getpath(\$p))) | (\$p | join(\".\"))] | join(\", \")" \
+    "$settings" 2>/dev/null)" || { warn "FAILED to read back $settings"; return; }
+  [ -z "$drift" ] || warn "Claude baseline settings drift after write in $settings: $drift"
+}
+
 main() {
   log "Linking dotfiles from $DOTFILES_DIR"
   link_tree
+  merge_claude_settings
 
   stub "$HOME/.config/zsh/local.zsh" \
     "# Personal zsh overlay — not tracked by the team dotfiles repo." \
