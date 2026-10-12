@@ -12,8 +12,9 @@ installed by hand, so you get a complete modern shell with nothing to configure.
 | **This repo** | the *configuration* | applied at workspace start via the Coder dotfiles module |
 | **Your overlay** | *your* personal tweaks | auto-synced `overlay.zsh` (from your own `coder-overlay` repo) and `~/.config/zsh/local.zsh` (per-box, never tracked) |
 
-Because the tools are baked into the image, `install.sh` only creates symlinks —
-no downloads on boot, so a flaky network can't break the shell.
+Because the tools are baked into the image, `install.sh` only links
+configuration and writes a few local files, with no downloads on boot, so a
+flaky network can't break the shell.
 
 ## What you get
 
@@ -54,9 +55,10 @@ rust = "stable"
 
 ## Git identity
 
-On Coder, identity comes from your workspace
-profile automatically. Anywhere else, set it once in `~/.config/git/local.config`
-(a stub is created for you).
+On Coder, the workspace template writes your identity into
+`~/.config/git/identity.config` on every start, from your GitHub account (or
+the template's Git email parameter). Anywhere else, set it once in
+`~/.config/git/local.config` (a stub is created for you).
 
 ## Make it yours
 
@@ -80,6 +82,7 @@ Either way you get the baseline plus your own setup without forking this repo.
 ## Install by hand
 
 ```bash
+git clone https://github.com/enigmata-inc/dotfiles ~/.dotfiles
 ~/.dotfiles/install.sh
 ```
 
